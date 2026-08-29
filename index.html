@@ -353,29 +353,74 @@ function skipToNext() {
     }
 }
 
+// 💡 [수정됨] 정답 판정 유연화 함수 (숫자 인덱스, 텍스트, 콤마 복수 정답 모두 호환)
+function checkIsCorrect(userAns, q) {
+    if (!userAns) return false;
+    
+    const cleanUserAns = userAns.toString().replace(/\s+/g, '').toLowerCase();
+    const rawAnswer = q.answer;
+
+    // 1. 정답이 배열 형태인 경우 (예: 단답형 복수 정답 목록)
+    let possibleAnswers = [];
+    if (Array.isArray(rawAnswer)) {
+        possibleAnswers = rawAnswer.map(ans => ans.toString());
+    } else if (typeof rawAnswer === 'string' && rawAnswer.includes(',')) {
+        // 콤마로 구분된 경우
+        possibleAnswers = rawAnswer.split(',').map(ans => ans.trim());
+    } else {
+        possibleAnswers = [rawAnswer.toString()];
+    }
+
+    // 2. 객관식/OX에서 정답이 번호(숫자 또는 문자 "3", "1" 등)로 저장되어 있는 경우 대응
+    if (q.type === '객관식' && q.options) {
+        const numIdx = Number(rawAnswer);
+        if (!isNaN(numIdx) && numIdx >= 1 && numIdx <= q.options.length) {
+            possibleAnswers.push(q.options[numIdx - 1]); // 예: 정답이 3이면 3번 보기 텍스트도 정답으로 인정
+        }
+    } else if (q.type === 'OX') {
+        const numIdx = Number(rawAnswer);
+        if (numIdx === 1) possibleAnswers.push('O');
+        if (numIdx === 2) possibleAnswers.push('X');
+    }
+
+    // 3. 비교 검증 (공백 및 대소문자 무시)
+    return possibleAnswers.some(ans => {
+        return cleanUserAns === ans.replace(/\s+/g, '').toLowerCase();
+    });
+}
+
 // 개별 채점 진행 후 이동/제출
 function handleAction() {
     saveCurrentAnswer();
     const uAns = userAnswers[currentIndex] || "";
     const isLast = (currentIndex === selectedQuestions.length - 1);
     
-    // 1단계: 채점 진행 안 된 상태
     if (!isGradedCurrent) {
         const q = selectedQuestions[currentIndex];
-        const isCorrect = uAns && uAns.replace(/\s+/g, '').toLowerCase() === q.answer.toString().replace(/\s+/g, '').toLowerCase();
+        const isCorrect = checkIsCorrect(uAns, q);
         
         const feedbackBox = document.getElementById('feedback-box');
         feedbackBox.style.display = 'block';
         
+        // 정답 표기 시 보기 번호/텍스트 중 보기 좋은 형태로 노출
+        let displayAnswer = q.answer;
+        if (q.type === '객관식' && !isNaN(Number(q.answer)) && q.options) {
+            const idx = Number(q.answer) - 1;
+            if (q.options[idx]) displayAnswer = `${q.answer}. ${q.options[idx]}`;
+        } else if (q.type === 'OX' && Number(q.answer) === 1) {
+            displayAnswer = 'O';
+        } else if (q.type === 'OX' && Number(q.answer) === 2) {
+            displayAnswer = 'X';
+        }
+
         if (isCorrect) {
             feedbackBox.className = 'instant-feedback-box correct';
             feedbackBox.innerHTML = `<b>⭕ 정답입니다!</b><br>선택한 답: ${uAns}`;
         } else {
             feedbackBox.className = 'instant-feedback-box incorrect';
-            feedbackBox.innerHTML = `<b>❌ 오답입니다.</b><br>제출한 답: ${uAns || '<span style="color:#999;">(미입력)</span>'}<br><b>정답: ${q.answer}</b>`;
+            feedbackBox.innerHTML = `<b>❌ 오답입니다.</b><br>제출한 답: ${uAns || '<span style="color:#999;">(미입력)</span>'}<br><b>정답: ${displayAnswer}</b>`;
         }
 
-        // 채점 완료 후 UX 정리: 왼쪽 '다음 문제' 버튼 숨기고 오른쪽 버튼 통합
         document.getElementById('btn-skip').classList.add('hidden');
 
         const actionBtn = document.getElementById('btn-action');
@@ -387,7 +432,6 @@ function handleAction() {
         actionBtn.className = "btn btn-move-next";
         isGradedCurrent = true;
     } else {
-        // 2단계: 피드백 확인 후 다음 문제 이동 또는 최종 제출
         if (isLast) {
             finishQuiz();
         } else {
@@ -423,12 +467,22 @@ function finishQuiz() {
 
     selectedQuestions.forEach((q, idx) => {
         const uAns = userAnswers[idx] || "";
-        const isCorrect = uAns.replace(/\s+/g, '').toLowerCase() === q.answer.toString().replace(/\s+/g, '').toLowerCase();
+        const isCorrect = checkIsCorrect(uAns, q);
         
         if (isCorrect) score++;
 
         const sec = questionTimes[idx];
         const timeStr = sec >= 60 ? `${Math.floor(sec/60)}분 ${sec%60}초` : `${sec}초`;
+
+        let displayAnswer = q.answer;
+        if (q.type === '객관식' && !isNaN(Number(q.answer)) && q.options) {
+            const optIdx = Number(q.answer) - 1;
+            if (q.options[optIdx]) displayAnswer = `${q.answer}. ${q.options[optIdx]}`;
+        } else if (q.type === 'OX' && Number(q.answer) === 1) {
+            displayAnswer = 'O';
+        } else if (q.type === 'OX' && Number(q.answer) === 2) {
+            displayAnswer = 'X';
+        }
 
         detailsContainer.innerHTML += `
             <div class="result-item ${isCorrect ? 'correct-item' : 'incorrect-item'}">
@@ -441,7 +495,7 @@ function finishQuiz() {
                 <div style="font-size:14px; line-height:1.6;">
                     ${isCorrect ? '<b style="color:#2ecc71;">⭕ 정답입니다!</b>' : '<b style="color:#e74c3c;">❌ 오답입니다.</b>'}<br>
                     <b>내가 작성한 답:</b> ${uAns || '<span style="color:#999;">(미제출)</span>'}<br>
-                    <b>실제 정답:</b> <span style="color:#27ae60; font-weight:bold;">${q.answer}</span>
+                    <b>실제 정답:</b> <span style="color:#27ae60; font-weight:bold;">${displayAnswer}</span>
                 </div>
             </div>
         `;
