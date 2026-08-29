@@ -314,6 +314,8 @@ function loadQuestion(index) {
     const skipBtn = document.getElementById('btn-skip');
     const actionBtn = document.getElementById('btn-action');
 
+    skipBtn.classList.remove('hidden');
+
     if (isLast) {
         skipBtn.innerText = "최종 제출";
         actionBtn.innerText = "채점 후 제출";
@@ -357,16 +359,10 @@ function handleAction() {
     const uAns = userAnswers[currentIndex] || "";
     const isLast = (currentIndex === selectedQuestions.length - 1);
     
-    if (!uAns && !isGradedCurrent) {
-        if (!confirm("답안을 입력하지 않았습니다. 채점 없이 넘어가시겠습니까?")) {
-            return;
-        }
-    }
-
-    // 1단계: 채점 및 피드백 표시
-    if (!isGradedCurrent && uAns) {
+    // 1단계: 채점 진행 안 된 상태
+    if (!isGradedCurrent) {
         const q = selectedQuestions[currentIndex];
-        const isCorrect = uAns.replace(/\s+/g, '').toLowerCase() === q.answer.toString().replace(/\s+/g, '').toLowerCase();
+        const isCorrect = uAns && uAns.replace(/\s+/g, '').toLowerCase() === q.answer.toString().replace(/\s+/g, '').toLowerCase();
         
         const feedbackBox = document.getElementById('feedback-box');
         feedbackBox.style.display = 'block';
@@ -376,14 +372,17 @@ function handleAction() {
             feedbackBox.innerHTML = `<b>⭕ 정답입니다!</b><br>선택한 답: ${uAns}`;
         } else {
             feedbackBox.className = 'instant-feedback-box incorrect';
-            feedbackBox.innerHTML = `<b>❌ 오답입니다.</b><br>제출한 답: ${uAns}<br><b>정답: ${q.answer}</b>`;
+            feedbackBox.innerHTML = `<b>❌ 오답입니다.</b><br>제출한 답: ${uAns || '<span style="color:#999;">(미입력)</span>'}<br><b>정답: ${q.answer}</b>`;
         }
+
+        // 채점 완료 후 UX 정리: 왼쪽 '다음 문제' 버튼 숨기고 오른쪽 버튼 통합
+        document.getElementById('btn-skip').classList.add('hidden');
 
         const actionBtn = document.getElementById('btn-action');
         if (isLast) {
-            actionBtn.innerText = "최종 제출 🏁";
+            actionBtn.innerText = "최종 제출 ▶";
         } else {
-            actionBtn.innerText = "다음 문제로 이동 ▶";
+            actionBtn.innerText = "다음 문제 ▶";
         }
         actionBtn.className = "btn btn-move-next";
         isGradedCurrent = true;
