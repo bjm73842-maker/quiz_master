@@ -20,8 +20,6 @@
         .btn-start { background-color: #3498db; color: white; border: none; padding: 14px 28px; font-size: 16px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; width: 100%; max-width: 300px; }
         .btn-start:hover { background-color: #2980b9; }
 
-        .option-toggle { display: flex; align-items: center; justify-content: space-between; background: #f8f9fa; padding: 12px 16px; border-radius: 8px; border: 1px solid #e0e0e0; margin-bottom: 18px; }
-        
         /* Quiz Interface */
         .quiz-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 12px; margin-bottom: 20px; }
         .progress-text { font-weight: bold; color: #34495e; font-size: 16px; }
@@ -35,8 +33,7 @@
         
         .question-text { font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 20px; line-height: 1.6; }
         
-        /* 선지 및 입력창 하단 여백 대폭 확장 */
-        #q-options-container { margin-bottom: 35px; }
+        #q-options-container { margin-bottom: 25px; }
         .options-list { display: flex; flex-direction: column; gap: 12px; }
         .option-btn { background: #fff; border: 1.5px solid #dcdfe6; padding: 14px 18px; border-radius: 8px; text-align: left; font-size: 15px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
         .option-btn:hover { background: #f5f7fa; border-color: #c0c4cc; }
@@ -45,20 +42,26 @@
         .input-text { width: 100%; padding: 14px; border: 1.5px solid #dcdfe6; border-radius: 8px; font-size: 15px; outline: none; }
         .input-text:focus { border-color: #3498db; }
 
-        .instant-answer-box { background: #f8f9fa; border: 1px dashed #bbb; padding: 14px; border-radius: 8px; margin-bottom: 25px; font-size: 14px; display: none; }
+        /* 단일 문제 채점 피드백 박스 */
+        .instant-feedback-box { padding: 16px; border-radius: 8px; margin-bottom: 25px; font-size: 15px; line-height: 1.5; display: none; }
+        .instant-feedback-box.correct { background-color: #e8f8f5; border: 1.5px solid #2ecc71; color: #27ae60; }
+        .instant-feedback-box.incorrect { background-color: #fdedec; border: 1.5px solid #e74c3c; color: #c0392b; }
         
         .nav-buttons { display: flex; justify-content: space-between; gap: 10px; margin-top: 10px; }
         .btn { padding: 12px 18px; border-radius: 8px; font-size: 15px; font-weight: bold; border: none; cursor: pointer; transition: 0.2s; }
         .btn-prev { background: #95a5a6; color: white; }
         .btn-prev:hover { background: #7f8c8d; }
-        .btn-next { background: #3498db; color: white; flex-grow: 1; }
-        .btn-next:hover { background: #2980b9; }
-        .btn-early-submit { background: #e67e22; color: white; }
-        .btn-early-submit:hover { background: #d35400; }
+        .btn-check-next { background: #e67e22; color: white; flex-grow: 1; }
+        .btn-check-next:hover { background: #d35400; }
+        .btn-move-next { background: #3498db; color: white; flex-grow: 1; }
+        .btn-move-next:hover { background: #2980b9; }
         .btn-submit { background: #2ecc71; color: white; flex-grow: 1; }
         .btn-submit:hover { background: #27ae60; }
-        .btn-show-ans { background: #f39c12; color: white; }
-        .btn-show-ans:hover { background: #d35400; }
+
+        /* 백그라운드 카드 밖 하단 텍스트 버튼 */
+        .early-exit-wrapper { text-align: center; margin-top: 15px; }
+        .btn-text-exit { background: none; border: none; color: #888; font-size: 13px; text-decoration: underline; cursor: pointer; padding: 5px 10px; transition: 0.2s; }
+        .btn-text-exit:hover { color: #555; }
 
         /* Result View */
         .summary-card { background: #f8f9fa; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 25px; border: 1px solid #e9ecef; }
@@ -113,11 +116,6 @@
             </div>
         </div>
 
-        <div class="option-toggle">
-            <span style="font-weight: bold; font-size: 14px;">💡 한 문제 풀 때마다 정답 즉시 확인 옵션</span>
-            <label><input type="checkbox" id="instant-check-option"> 사용하기</label>
-        </div>
-
         <div class="start-section">
             <span class="question-count-badge" id="count-display">풀 수 있는 문제: 0개</span>
             <button class="btn-start" onclick="startQuiz()">문제 풀기 시작</button>
@@ -141,15 +139,12 @@
 
         <div id="q-options-container"></div>
 
-        <div class="instant-answer-box" id="instant-answer-box">
-            <b>정답:</b> <span id="instant-answer-text"></span>
-        </div>
+        <!-- 단일 문제 채점 피드백 영역 -->
+        <div class="instant-feedback-box" id="feedback-box"></div>
 
         <div class="nav-buttons">
             <button class="btn btn-prev" id="btn-prev" onclick="prevQuestion()">이전 문제</button>
-            <button class="btn btn-show-ans hidden" id="btn-show-ans" onclick="toggleInstantAnswer()">바로 정답 확인</button>
-            <button class="btn btn-early-submit" onclick="confirmEarlySubmit()">중도 채점하기</button>
-            <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">다음 문제</button>
+            <button class="btn btn-check-next" id="btn-action" onclick="handleAction()">채점 후 다음 문제</button>
             <button class="btn btn-submit hidden" id="btn-submit" onclick="finishQuiz()">최종 제출 및 채점</button>
         </div>
     </div>
@@ -169,6 +164,11 @@
     </div>
 </div>
 
+<!-- 백그라운드 카드 바깥 하단 저위계 버튼 -->
+<div id="early-exit-area" class="early-exit-wrapper hidden">
+    <button class="btn-text-exit" onclick="confirmEarlySubmit()">풀이 중지 후 채점</button>
+</div>
+
 <script>
 let allQuestions = [];
 let selectedQuestions = [];
@@ -177,7 +177,7 @@ let userAnswers = [];
 let questionTimes = [];
 let timerInterval = null;
 let currentQuestionTime = 0;
-let isInstantMode = false;
+let isGradedCurrent = false; // 현재 문제가 1차 채점되었는지 여부
 
 fetch('questions.json')
     .then(res => res.json())
@@ -215,14 +215,10 @@ function startQuiz() {
     selectedQuestions = [...filtered].sort(() => Math.random() - 0.5);
     userAnswers = new Array(selectedQuestions.length).fill("");
     questionTimes = new Array(selectedQuestions.length).fill(0);
-    
-    isInstantMode = document.getElementById('instant-check-option').checked;
-    if (isInstantMode) {
-        document.getElementById('btn-show-ans').classList.remove('hidden');
-    }
 
     document.getElementById('setup-screen').classList.add('hidden');
     document.getElementById('quiz-screen').classList.remove('hidden');
+    document.getElementById('early-exit-area').classList.remove('hidden');
 
     currentIndex = 0;
     loadQuestion(currentIndex);
@@ -262,7 +258,8 @@ function saveCurrentAnswer() {
 
 function loadQuestion(index) {
     stopTimer();
-    
+    isGradedCurrent = false;
+
     const q = selectedQuestions[index];
     document.getElementById('progress-text').innerText = `문제 ${index + 1} / ${selectedQuestions.length}`;
     document.getElementById('q-unit').innerText = q.unit;
@@ -303,25 +300,33 @@ function loadQuestion(index) {
         `;
     }
 
-    const ansBox = document.getElementById('instant-answer-box');
-    ansBox.style.display = 'none';
-    document.getElementById('instant-answer-text').innerText = q.answer;
+    // 피드백 박스 초기화
+    const feedbackBox = document.getElementById('feedback-box');
+    feedbackBox.style.display = 'none';
+    feedbackBox.className = 'instant-feedback-box';
 
+    // 버튼 상태 초기화
     document.getElementById('btn-prev').disabled = (index === 0);
     document.getElementById('btn-prev').style.opacity = (index === 0) ? '0.5' : '1';
 
+    const actionBtn = document.getElementById('btn-action');
+    const submitBtn = document.getElementById('btn-submit');
+
     if (index === selectedQuestions.length - 1) {
-        document.getElementById('btn-next').classList.add('hidden');
-        document.getElementById('btn-submit').classList.remove('hidden');
+        actionBtn.classList.add('hidden');
+        submitBtn.classList.remove('hidden');
     } else {
-        document.getElementById('btn-next').classList.remove('hidden');
-        document.getElementById('btn-submit').classList.add('hidden');
+        actionBtn.classList.remove('hidden');
+        submitBtn.classList.add('hidden');
+        actionBtn.innerText = "채점 후 다음 문제";
+        actionBtn.className = "btn btn-check-next";
     }
 
     startTimer();
 }
 
 function selectOption(el) {
+    if (isGradedCurrent) return; // 이미 채점한 상태면 변경 불가
     const labels = document.querySelectorAll('.option-btn');
     labels.forEach(l => l.classList.remove('selected'));
     el.classList.add('selected');
@@ -332,12 +337,40 @@ function selectOption(el) {
     }
 }
 
-function toggleInstantAnswer() {
-    const ansBox = document.getElementById('instant-answer-box');
-    if (ansBox.style.display === 'none' || ansBox.style.display === '') {
-        ansBox.style.display = 'block';
+function handleAction() {
+    saveCurrentAnswer();
+    const uAns = userAnswers[currentIndex] || "";
+    
+    if (!uAns) {
+        if (!confirm("답안을 입력하지 않았습니다. 채점 없이 다음 문제로 넘어가시겠습니까?")) {
+            return;
+        }
+    }
+
+    // 1단계: 아직 채점이 안 된 경우 채점 실시 및 결과 표시
+    if (!isGradedCurrent && uAns) {
+        const q = selectedQuestions[currentIndex];
+        const isCorrect = uAns.replace(/\s+/g, '').toLowerCase() === q.answer.toString().replace(/\s+/g, '').toLowerCase();
+        
+        const feedbackBox = document.getElementById('feedback-box');
+        feedbackBox.style.display = 'block';
+        
+        if (isCorrect) {
+            feedbackBox.className = 'instant-feedback-box correct';
+            feedbackBox.innerHTML = `<b>⭕ 정답입니다!</b><br>선택한 답: ${uAns}`;
+        } else {
+            feedbackBox.className = 'instant-feedback-box incorrect';
+            feedbackBox.innerHTML = `<b>❌ 오답입니다.</b><br>제출한 답: ${uAns}<br><b>정답: ${q.answer}</b>`;
+        }
+
+        // 버튼 텍스트 변경 (다음으로 이동 유도)
+        const actionBtn = document.getElementById('btn-action');
+        actionBtn.innerText = "다음 문제로 이동 ▶";
+        actionBtn.className = "btn btn-move-next";
+        isGradedCurrent = true;
     } else {
-        ansBox.style.display = 'none';
+        // 2단계: 이미 채점이 끝난 상태에서 클릭 시 다음 문제로 이동
+        nextQuestion();
     }
 }
 
@@ -350,7 +383,6 @@ function prevQuestion() {
 }
 
 function nextQuestion() {
-    saveCurrentAnswer();
     if (currentIndex < selectedQuestions.length - 1) {
         currentIndex++;
         loadQuestion(currentIndex);
@@ -358,7 +390,7 @@ function nextQuestion() {
 }
 
 function confirmEarlySubmit() {
-    if (confirm("아직 풀지 않은 문제가 있을 수 있습니다. 지금까지 작성한 상태로 바로 채점하시겠습니까?")) {
+    if (confirm("풀이를 중지하고 지금까지 푼 상태로 결과를 확인하시겠습니까?")) {
         finishQuiz();
     }
 }
@@ -407,6 +439,7 @@ function finishQuiz() {
     document.getElementById('total-time-text').innerText = `총 소요 시간: ${totalMin > 0 ? totalMin + '분 ' : ''}${totalRemSec}초`;
 
     document.getElementById('quiz-screen').classList.add('hidden');
+    document.getElementById('early-exit-area').classList.add('hidden');
     document.getElementById('result-screen').classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
