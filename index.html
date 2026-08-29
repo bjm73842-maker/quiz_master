@@ -3,29 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>문제 은행 플랫폼</title>
+    <title>맞춤형 문제 은행 플랫폼</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h1 { text-align: center; color: #2c3e50; margin-bottom: 25px; }
-        .filter-group { margin-bottom: 20px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #eee; }
-        .filter-title { font-weight: bold; margin-bottom: 10px; color: #34495e; display: block; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; line-height: 1.5; }
+        .container { max-width: 760px; margin: 20px auto; background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h1 { text-align: center; color: #2c3e50; margin-top: 0; margin-bottom: 25px; font-size: 26px; }
+        
+        .filter-group { margin-bottom: 18px; background: #fafafa; padding: 16px; border-radius: 8px; border: 1px solid #e9ecef; }
+        .filter-title { font-weight: bold; margin-bottom: 10px; color: #34495e; display: block; font-size: 15px; }
         .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
-        label { font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-        select, button { padding: 10px 15px; border-radius: 6px; border: 1px solid #ccc; font-size: 15px; }
-        .btn-start { background-color: #3498db; color: white; border: none; width: 100%; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 15px; }
+        label { font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none; }
+        
+        .start-section { margin-top: 25px; text-align: center; background: #eef6fc; padding: 20px; border-radius: 8px; border: 1px solid #d0e3f7; }
+        .question-count-badge { font-size: 18px; font-weight: bold; color: #2980b9; margin-bottom: 12px; display: block; }
+        .btn-start { background-color: #3498db; color: white; border: none; padding: 14px 28px; font-size: 16px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; width: 100%; max-width: 300px; }
         .btn-start:hover { background-color: #2980b9; }
-        .question-card { border-bottom: 1px solid #eee; padding: 20px 0; }
-        .question-card:last-child { border-bottom: none; }
-        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: #e0e0e0; margin-right: 5px; }
-        .options { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .input-text { width: 95%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        .result-box { margin-top: 15px; padding: 12px; border-radius: 6px; font-weight: bold; display: none; }
-        .correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .incorrect { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .btn-submit { background-color: #2ecc71; color: white; border: none; width: 100%; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 20px; }
-        .btn-submit:hover { background-color: #27ae60; }
-        .hidden { display: none; }
+
+        .option-toggle { display: flex; align-items: center; justify-content: space-between; background: #f8f9fa; padding: 12px 16px; border-radius: 8px; border: 1px solid #e0e0e0; margin-bottom: 18px; }
+        
+        /* Quiz Interface */
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 12px; margin-bottom: 20px; }
+        .progress-text { font-weight: bold; color: #34495e; font-size: 16px; }
+        .timer-badge { background: #ffeaa7; color: #d63031; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+        
+        .badges { margin-bottom: 12px; }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: #e0e0e0; margin-right: 5px; }
+        .badge-unit { background: #e1f5fe; color: #0288d1; }
+        .badge-type { background: #f3e5f5; color: #7b1fa2; }
+        .badge-tag { background: #fff3e0; color: #e65100; }
+        
+        .question-text { font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 20px; line-height: 1.6; }
+        .options-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
+        .option-btn { background: #fff; border: 1.5px solid #dcdfe6; padding: 12px 16px; border-radius: 8px; text-align: left; font-size: 15px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; }
+        .option-btn:hover { background: #f5f7fa; border-color: #c0c4cc; }
+        .option-btn.selected { background: #e8f4ff; border-color: #3498db; font-weight: bold; color: #2980b9; }
+        
+        .input-text { width: 100%; padding: 12px; border: 1.5px solid #dcdfe6; border-radius: 8px; font-size: 15px; outline: none; }
+        .input-text:focus { border-color: #3498db; }
+
+        .instant-answer-box { background: #f8f9fa; border: 1px dashed #bbb; padding: 14px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; display: none; }
+        
+        .nav-buttons { display: flex; justify-content: space-between; gap: 10px; }
+        .btn { padding: 12px 20px; border-radius: 8px; font-size: 15px; font-weight: bold; border: none; cursor: pointer; transition: 0.2s; }
+        .btn-prev { background: #95a5a6; color: white; }
+        .btn-prev:hover { background: #7f8c8d; }
+        .btn-next { background: #3498db; color: white; flex-grow: 1; }
+        .btn-next:hover { background: #2980b9; }
+        .btn-submit { background: #2ecc71; color: white; flex-grow: 1; }
+        .btn-submit:hover { background: #27ae60; }
+        .btn-show-ans { background: #f39c12; color: white; }
+        .btn-show-ans:hover { background: #d35400; }
+
+        /* Result View */
+        .summary-card { background: #f8f9fa; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 25px; border: 1px solid #e9ecef; }
+        .score-num { font-size: 32px; font-weight: bold; color: #2c3e50; }
+        
+        .result-item { border: 1px solid #e0e0e0; border-radius: 8px; padding: 18px; margin-bottom: 15px; background: #fff; }
+        .result-item.correct-item { border-left: 6px solid #2ecc71; }
+        .result-item.incorrect-item { border-left: 6px solid #e74c3c; }
+        .time-tag { float: right; font-size: 12px; background: #edf2f7; color: #4a5568; padding: 3px 8px; border-radius: 12px; font-weight: normal; }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -33,160 +72,329 @@
 <div class="container">
     <h1>📝 맞춤형 문제 은행</h1>
     
+    <!-- 1. 설정 및 필터 화면 -->
     <div id="setup-screen">
         <div class="filter-group">
             <span class="filter-title">1. 문제 유형 선택 (미선택 시 전체)</span>
             <div class="checkbox-grid">
-                <label><input type="checkbox" name="type" value="객관식"> 객관식</label>
-                <label><input type="checkbox" name="type" value="OX"> OX</label>
-                <label><input type="checkbox" name="type" value="단답형"> 단답형</label>
+                <label><input type="checkbox" name="type" value="객관식" onchange="updateAvailableCount()"> 객관식</label>
+                <label><input type="checkbox" name="type" value="OX" onchange="updateAvailableCount()"> OX</label>
+                <label><input type="checkbox" name="type" value="단답형" onchange="updateAvailableCount()"> 단답형</label>
             </div>
         </div>
 
         <div class="filter-group">
             <span class="filter-title">2. 능력단위 선택 (미선택 시 전체)</span>
             <div class="checkbox-grid">
-                <label><input type="checkbox" name="unit" value="색채계획"> 색채계획</label>
-                <label><input type="checkbox" name="unit" value="가구계획"> 가구계획</label>
-                <label><input type="checkbox" name="unit" value="기본계획"> 기본계획</label>
-                <label><input type="checkbox" name="unit" value="마감계획"> 마감계획</label>
-                <label><input type="checkbox" name="unit" value="조명계획"> 조명계획</label>
-                <label><input type="checkbox" name="unit" value="설비계획"> 설비계획</label>
-                <label><input type="checkbox" name="unit" value="자료조사분석"> 자료조사분석</label>
-                <label><input type="checkbox" name="unit" value="시각화작업"> 시각화작업</label>
+                <label><input type="checkbox" name="unit" value="색채계획" onchange="updateAvailableCount()"> 색채계획</label>
+                <label><input type="checkbox" name="unit" value="가구계획" onchange="updateAvailableCount()"> 가구계획</label>
+                <label><input type="checkbox" name="unit" value="기본계획" onchange="updateAvailableCount()"> 기본계획</label>
+                <label><input type="checkbox" name="unit" value="마감계획" onchange="updateAvailableCount()"> 마감계획</label>
+                <label><input type="checkbox" name="unit" value="조명계획" onchange="updateAvailableCount()"> 조명계획</label>
+                <label><input type="checkbox" name="unit" value="설비계획" onchange="updateAvailableCount()"> 설비계획</label>
+                <label><input type="checkbox" name="unit" value="자료조사분석" onchange="updateAvailableCount()"> 자료조사분석</label>
+                <label><input type="checkbox" name="unit" value="시각화작업" onchange="updateAvailableCount()"> 시각화작업</label>
             </div>
         </div>
 
         <div class="filter-group">
             <span class="filter-title">3. 특징 선택 (미선택 시 전체)</span>
             <div class="checkbox-grid">
-                <label><input type="checkbox" name="tag" value="기초"> 기초</label>
-                <label><input type="checkbox" name="tag" value="심화"> 심화</label>
-                <label><input type="checkbox" name="tag" value="학생출제"> 학생출제</label>
-                <label><input type="checkbox" name="tag" value="기출"> 기출</label>
+                <label><input type="checkbox" name="tag" value="기초" onchange="updateAvailableCount()"> 기초</label>
+                <label><input type="checkbox" name="tag" value="심화" onchange="updateAvailableCount()"> 심화</label>
+                <label><input type="checkbox" name="tag" value="학생출제" onchange="updateAvailableCount()"> 학생출제</label>
+                <label><input type="checkbox" name="tag" value="기출" onchange="updateAvailableCount()"> 기출</label>
             </div>
         </div>
 
-        <div class="filter-group">
-            <span class="filter-title">4. 풀 문제 수</span>
-            <select id="count-select">
-                <option value="10">10 문제</option>
-                <option value="20">20 문제</option>
-            </select>
+        <div class="option-toggle">
+            <span style="font-weight: bold; font-size: 14px;">💡 한 문제 풀 때마다 정답 즉시 확인 옵션</span>
+            <label><input type="checkbox" id="instant-check-option"> 사용하기</label>
         </div>
 
-        <button class="btn-start" onclick="startQuiz()">문제 풀기 시작</button>
+        <div class="start-section">
+            <span class="question-count-badge" id="count-display">풀 수 있는 문제: 0개</span>
+            <button class="btn-start" onclick="startQuiz()">문제 풀기 시작</button>
+        </div>
     </div>
 
+    <!-- 2. 한 문제씩 풀어가는 풀이 화면 -->
     <div id="quiz-screen" class="hidden">
-        <div id="questions-container"></div>
-        <button id="submit-btn" class="btn-submit" onclick="gradeQuiz()">제출 및 채점하기</button>
-        <button id="retry-btn" class="btn-start hidden" onclick="location.reload()">새로운 문제 풀기</button>
+        <div class="quiz-header">
+            <span class="progress-text" id="progress-text">문제 1 / 10</span>
+            <div class="timer-badge">⏱️ <span id="current-question-timer">00:00</span></div>
+        </div>
+
+        <div class="badges">
+            <span class="badge badge-unit" id="q-unit"></span>
+            <span class="badge badge-type" id="q-type"></span>
+            <span class="badge badge-tag" id="q-tag"></span>
+        </div>
+
+        <div class="question-text" id="q-question"></div>
+
+        <div id="q-options-container"></div>
+
+        <div class="instant-answer-box" id="instant-answer-box">
+            <b>정답:</b> <span id="instant-answer-text"></span>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="btn btn-prev" id="btn-prev" onclick="prevQuestion()">이전 문제</button>
+            <button class="btn btn-show-ans hidden" id="btn-show-ans" onclick="toggleInstantAnswer()">바로 정답 확인</button>
+            <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">다음 문제</button>
+            <button class="btn btn-submit hidden" id="btn-submit" onclick="finishQuiz()">최종 제출 및 채점</button>
+        </div>
+    </div>
+
+    <!-- 3. 최종 결과 화면 -->
+    <div id="result-screen" class="hidden">
+        <div class="summary-card">
+            <h2>🎉 수고하셨습니다!</h2>
+            <div class="score-num"><span id="final-score">0</span> / <span id="final-total">0</span></div>
+            <p style="color:#666; margin-top:5px;" id="total-time-text"></p>
+        </div>
+
+        <h3>📋 상세 결과 및 문제별 소요시간</h3>
+        <div id="result-details"></div>
+
+        <button class="btn btn-start" style="width:100%; max-width:100%; margin-top:20px;" onclick="location.reload()">새로운 옵션으로 다시 풀기</button>
     </div>
 </div>
 
 <script>
 let allQuestions = [];
 let selectedQuestions = [];
+let currentIndex = 0;
+let userAnswers = [];
+let questionTimes = [];
+let timerInterval = null;
+let currentQuestionTime = 0;
+let isInstantMode = false;
 
 fetch('questions.json')
     .then(res => res.json())
-    .then(data => { allQuestions = data; })
-    .catch(err => alert("문제 데이터를 불러오는 데 실패했습니다. questions.json 파일을 확인해주세요."));
+    .then(data => { 
+        allQuestions = data; 
+        updateAvailableCount();
+    })
+    .catch(err => alert("questions.json 파일을 불러오지 못했습니다. 파일 이름을 확인해주세요."));
 
-function startQuiz() {
+function getFilteredQuestions() {
     const types = Array.from(document.querySelectorAll('input[name="type"]:checked')).map(e => e.value);
     const units = Array.from(document.querySelectorAll('input[name="unit"]:checked')).map(e => e.value);
     const tags = Array.from(document.querySelectorAll('input[name="tag"]:checked')).map(e => e.value);
-    const count = parseInt(document.getElementById('count-select').value);
 
-    let filtered = allQuestions.filter(q => {
+    return allQuestions.filter(q => {
         const matchType = types.length === 0 || types.includes(q.type);
         const matchUnit = units.length === 0 || units.includes(q.unit);
         const matchTag = tags.length === 0 || tags.includes(q.tag);
         return matchType && matchUnit && matchTag;
     });
+}
 
+function updateAvailableCount() {
+    const filtered = getFilteredQuestions();
+    document.getElementById('count-display').innerText = `풀 수 있는 문제: ${filtered.length}개`;
+}
+
+function startQuiz() {
+    const filtered = getFilteredQuestions();
     if (filtered.length === 0) {
-        alert("선택한 조건에 해당하는 문제가 없습니다!");
+        alert("선택하신 조건에 해당하는 문제가 없습니다. 옵션을 변경해보세요!");
         return;
     }
 
-    filtered.sort(() => Math.random() - 0.5);
-    selectedQuestions = filtered.slice(0, count);
+    selectedQuestions = [...filtered].sort(() => Math.random() - 0.5);
+    userAnswers = new Array(selectedQuestions.length).fill("");
+    questionTimes = new Array(selectedQuestions.length).fill(0);
+    
+    isInstantMode = document.getElementById('instant-check-option').checked;
+    if (isInstantMode) {
+        document.getElementById('btn-show-ans').classList.remove('hidden');
+    }
 
-    renderQuestions();
     document.getElementById('setup-screen').classList.add('hidden');
     document.getElementById('quiz-screen').classList.remove('hidden');
+
+    currentIndex = 0;
+    loadQuestion(currentIndex);
 }
 
-function renderQuestions() {
-    const container = document.getElementById('questions-container');
+function startTimer() {
+    stopTimer();
+    currentQuestionTime = questionTimes[currentIndex] || 0;
+    updateTimerDisplay();
+    timerInterval = setInterval(() => {
+        currentQuestionTime++;
+        questionTimes[currentIndex] = currentQuestionTime;
+        updateTimerDisplay();
+    }, 1000);
+}
+
+function stopTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+}
+
+function updateTimerDisplay() {
+    const min = String(Math.floor(currentQuestionTime / 60)).padStart(2, '0');
+    const sec = String(currentQuestionTime % 60).padStart(2, '0');
+    document.getElementById('current-question-timer').innerText = `${min}:${sec}`;
+}
+
+function saveCurrentAnswer() {
+    const q = selectedQuestions[currentIndex];
+    if (q.type === '객관식' || q.type === 'OX') {
+        const selected = document.querySelector('input[name="current_option"]:checked');
+        if (selected) userAnswers[currentIndex] = selected.value;
+    } else if (q.type === '단답형') {
+        const input = document.getElementById('short-answer-input');
+        if (input) userAnswers[currentIndex] = input.value.trim();
+    }
+}
+
+function loadQuestion(index) {
+    stopTimer();
+    
+    const q = selectedQuestions[index];
+    document.getElementById('progress-text').innerText = `문제 ${index + 1} / ${selectedQuestions.length}`;
+    document.getElementById('q-unit').innerText = q.unit;
+    document.getElementById('q-type').innerText = q.type;
+    document.getElementById('q-tag').innerText = q.tag;
+    document.getElementById('q-question').innerText = `Q${index + 1}. ${q.question}`;
+
+    const container = document.getElementById('q-options-container');
     container.innerHTML = '';
 
-    selectedQuestions.forEach((q, idx) => {
-        let optionsHtml = '';
-        if (q.type === '객관식') {
-            optionsHtml = `<div class="options">
-                ${q.options.map((opt, i) => `<label><input type="radio" name="q_${idx}" value="${opt}"> ${i+1}. ${opt}</label>`).join('')}
-            </div>`;
-        } else if (q.type === 'OX') {
-            optionsHtml = `<div class="options">
-                <label><input type="radio" name="q_${idx}" value="O"> O</label>
-                <label><input type="radio" name="q_${idx}" value="X"> X</label>
-            </div>`;
-        } else if (q.type === '단답형') {
-            optionsHtml = `<div class="options" style="margin-top:8px;">
-                <input type="text" class="input-text" id="input_${idx}" placeholder="정답을 입력하세요">
-            </div>`;
-        }
+    const currentAns = userAnswers[index];
 
-        container.innerHTML += `
-            <div class="question-card" id="card_${idx}">
+    if (q.type === '객관식') {
+        q.options.forEach((opt, idx) => {
+            const isChecked = currentAns === opt ? 'checked' : '';
+            const isSelectedClass = currentAns === opt ? 'selected' : '';
+            container.innerHTML += `
+                <label class="option-btn ${isSelectedClass}" onclick="selectOption(this)">
+                    <input type="radio" name="current_option" value="${opt}" ${isChecked} onchange="saveCurrentAnswer()" style="display:none;">
+                    <span>${idx + 1}. ${opt}</span>
+                </label>
+            `;
+        });
+    } else if (q.type === 'OX') {
+        ['O', 'X'].forEach(opt => {
+            const isChecked = currentAns === opt ? 'checked' : '';
+            const isSelectedClass = currentAns === opt ? 'selected' : '';
+            container.innerHTML += `
+                <label class="option-btn ${isSelectedClass}" onclick="selectOption(this)">
+                    <input type="radio" name="current_option" value="${opt}" ${isChecked} onchange="saveCurrentAnswer()" style="display:none;">
+                    <span>${opt}</span>
+                </label>
+            `;
+        });
+    } else if (q.type === '단답형') {
+        container.innerHTML = `
+            <input type="text" id="short-answer-input" class="input-text" value="${currentAns}" placeholder="정답을 입력하세요" oninput="saveCurrentAnswer()">
+        `;
+    }
+
+    const ansBox = document.getElementById('instant-answer-box');
+    ansBox.style.display = 'none';
+    document.getElementById('instant-answer-text').innerText = q.answer;
+
+    document.getElementById('btn-prev').disabled = (index === 0);
+    document.getElementById('btn-prev').style.opacity = (index === 0) ? '0.5' : '1';
+
+    if (index === selectedQuestions.length - 1) {
+        document.getElementById('btn-next').classList.add('hidden');
+        document.getElementById('btn-submit').classList.remove('hidden');
+    } else {
+        document.getElementById('btn-next').classList.remove('hidden');
+        document.getElementById('btn-submit').classList.add('hidden');
+    }
+
+    startTimer();
+}
+
+function selectOption(el) {
+    const labels = document.querySelectorAll('.option-btn');
+    labels.forEach(l => l.classList.remove('selected'));
+    el.classList.add('selected');
+    const radio = el.querySelector('input[type="radio"]');
+    if (radio) {
+        radio.checked = true;
+        saveCurrentAnswer();
+    }
+}
+
+function toggleInstantAnswer() {
+    const ansBox = document.getElementById('instant-answer-box');
+    if (ansBox.style.display === 'none' || ansBox.style.display === '') {
+        ansBox.style.display = 'block';
+    } else {
+        ansBox.style.display = 'none';
+    }
+}
+
+function prevQuestion() {
+    saveCurrentAnswer();
+    if (currentIndex > 0) {
+        currentIndex--;
+        loadQuestion(currentIndex);
+    }
+}
+
+function nextQuestion() {
+    saveCurrentAnswer();
+    if (currentIndex < selectedQuestions.length - 1) {
+        currentIndex++;
+        loadQuestion(currentIndex);
+    }
+}
+
+function finishQuiz() {
+    saveCurrentAnswer();
+    stopTimer();
+
+    let score = 0;
+    let totalSec = questionTimes.reduce((a, b) => a + b, 0);
+
+    const detailsContainer = document.getElementById('result-details');
+    detailsContainer.innerHTML = '';
+
+    selectedQuestions.forEach((q, idx) => {
+        const uAns = userAnswers[idx] || "";
+        const isCorrect = uAns.replace(/\s+/g, '').toLowerCase() === q.answer.toString().replace(/\s+/g, '').toLowerCase();
+        
+        if (isCorrect) score++;
+
+        const sec = questionTimes[idx];
+        const timeStr = sec >= 60 ? `${Math.floor(sec/60)}분 ${sec%60}초` : `${sec}초`;
+
+        detailsContainer.innerHTML += `
+            <div class="result-item ${isCorrect ? 'correct-item' : 'incorrect-item'}">
                 <div>
-                    <span class="badge">${q.unit}</span>
-                    <span class="badge" style="background:#d0e6ff">${q.type}</span>
-                    <span class="badge" style="background:#ffe0b2">${q.tag}</span>
+                    <span class="badge badge-unit">${q.unit}</span>
+                    <span class="badge badge-type">${q.type}</span>
+                    <span class="time-tag">⏱️ 풀이시간: ${timeStr}</span>
                 </div>
-                <h3>Q${idx + 1}. ${q.question}</h3>
-                ${optionsHtml}
-                <div class="result-box" id="result_${idx}"></div>
+                <h4 style="margin: 10px 0 8px 0; font-size:16px;">Q${idx + 1}. ${q.question}</h4>
+                <div style="font-size:14px; line-height:1.6;">
+                    ${isCorrect ? '<b style="color:#2ecc71;">⭕ 정답입니다!</b>' : '<b style="color:#e74c3c;">❌ 오답입니다.</b>'}<br>
+                    <b>내가 작성한 답:</b> ${uAns || '<span style="color:#999;">(미제출)</span>'}<br>
+                    <b>실제 정답:</b> <span style="color:#27ae60; font-weight:bold;">${q.answer}</span>
+                </div>
             </div>
         `;
     });
-}
 
-function gradeQuiz() {
-    let score = 0;
+    document.getElementById('final-score').innerText = score;
+    document.getElementById('final-total').innerText = selectedQuestions.length;
+    
+    const totalMin = Math.floor(totalSec / 60);
+    const totalRemSec = totalSec % 60;
+    document.getElementById('total-time-text').innerText = `총 소요 시간: ${totalMin > 0 ? totalMin + '분 ' : ''}${totalRemSec}초`;
 
-    selectedQuestions.forEach((q, idx) => {
-        let userAnswer = "";
-        if (q.type === '객관식' || q.type === 'OX') {
-            const selected = document.querySelector(`input[name="q_${idx}"]:checked`);
-            if (selected) userAnswer = selected.value;
-        } else if (q.type === '단답형') {
-            const input = document.getElementById(`input_${idx}`);
-            if (input) userAnswer = input.value.trim();
-        }
-
-        const resultBox = document.getElementById(`result_${idx}`);
-        resultBox.style.display = 'block';
-
-        const isCorrect = userAnswer.replace(/\s+/g, '').toLowerCase() === q.answer.toString().replace(/\s+/g, '').toLowerCase();
-
-        if (isCorrect) {
-            score++;
-            resultBox.className = "result-box correct";
-            resultBox.innerHTML = `⭕ 정답입니다!`;
-        } else {
-            resultBox.className = "result-box incorrect";
-            resultBox.innerHTML = `❌ 오답입니다. <br><b>내 제출:</b> ${userAnswer || '(미제출)'}<br><b>정답:</b> ${q.answer}`;
-        }
-    });
-
-    alert(`총 ${selectedQuestions.length}문제 중 ${score}문제를 맞히셨습니다!`);
-    document.getElementById('submit-btn').classList.add('hidden');
-    document.getElementById('retry-btn').classList.remove('hidden');
+    document.getElementById('quiz-screen').classList.add('hidden');
+    document.getElementById('result-screen').classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 </script>
