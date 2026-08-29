@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>맞춤형 문제 은행 플랫폼</title>
+    <title>3D건축인테리어과 실내건축산업기사 문제 은행</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; line-height: 1.5; }
@@ -78,7 +78,7 @@
 <body>
 
 <div class="container">
-    <h1>📝 맞춤형 문제 은행</h1>
+    <h1>📝3D건축인테리어과 실내건축산업기사 문제 은행</h1>
     
     <!-- 1. 설정 및 필터 화면 -->
     <div id="setup-screen">
@@ -112,7 +112,6 @@
                 <label><input type="checkbox" name="tag" value="심화" onchange="updateAvailableCount()"> 심화</label>
                 <label><input type="checkbox" name="tag" value="학생출제" onchange="updateAvailableCount()"> 학생출제</label>
                 <label><input type="checkbox" name="tag" value="기출" onchange="updateAvailableCount()"> 기출</label>
-                <label><input type="checkbox" name="tag" value="외부출처" onchange="updateAvailableCount()"> 외부 출처 문제</label>
             </div>
         </div>
 
@@ -153,6 +152,8 @@
     <div id="result-screen" class="hidden">
         <div class="summary-card">
             <h2>🎉 수고하셨습니다!</h2>
+            <h4>틀린 문제 속 키워드를 PDF에서 검색해</h4>
+            <h4>정답의 근거를 꼭 확인하세요.</h4>
             <div class="score-num"><span id="final-score">0</span> / <span id="final-total">0</span></div>
             <p style="color:#666; margin-top:5px;" id="total-time-text"></p>
         </div>
@@ -175,6 +176,7 @@ let selectedQuestions = [];
 let currentIndex = 0;
 let userAnswers = [];
 let questionTimes = [];
+let visitedQuestions = []; // 새로 추가: 방문(노출)된 문제 인덱스를 기록하는 배열
 let timerInterval = null;
 let currentQuestionTime = 0;
 let isGradedCurrent = false;
@@ -215,6 +217,7 @@ function startQuiz() {
     selectedQuestions = [...filtered].sort(() => Math.random() - 0.5);
     userAnswers = new Array(selectedQuestions.length).fill("");
     questionTimes = new Array(selectedQuestions.length).fill(0);
+    visitedQuestions = new Array(selectedQuestions.length).fill(false); // 초기화
 
     document.getElementById('setup-screen').classList.add('hidden');
     document.getElementById('quiz-screen').classList.remove('hidden');
@@ -260,6 +263,9 @@ function loadQuestion(index) {
     stopTimer();
     isGradedCurrent = false;
 
+    // 현재 문제를 마주했으므로 방문 기록 체크
+    visitedQuestions[index] = true;
+
     const q = selectedQuestions[index];
     const isLast = (index === selectedQuestions.length - 1);
 
@@ -302,12 +308,10 @@ function loadQuestion(index) {
         `;
     }
 
-    // 피드백 박스 초기화
     const feedbackBox = document.getElementById('feedback-box');
     feedbackBox.style.display = 'none';
     feedbackBox.className = 'instant-feedback-box';
 
-    // 버튼 상태 초기화
     document.getElementById('btn-prev').disabled = (index === 0);
     document.getElementById('btn-prev').style.opacity = (index === 0) ? '0.5' : '1';
 
@@ -340,7 +344,6 @@ function selectOption(el) {
     }
 }
 
-// 개별 채점 없이 넘어가거나 바로 제출
 function skipToNext() {
     saveCurrentAnswer();
     const isLast = (currentIndex === selectedQuestions.length - 1);
@@ -353,29 +356,25 @@ function skipToNext() {
     }
 }
 
-// 💡 [수정됨] 정답 판정 유연화 함수 (숫자 인덱스, 텍스트, 콤마 복수 정답 모두 호환)
 function checkIsCorrect(userAns, q) {
     if (!userAns) return false;
     
     const cleanUserAns = userAns.toString().replace(/\s+/g, '').toLowerCase();
     const rawAnswer = q.answer;
 
-    // 1. 정답이 배열 형태인 경우 (예: 단답형 복수 정답 목록)
     let possibleAnswers = [];
     if (Array.isArray(rawAnswer)) {
         possibleAnswers = rawAnswer.map(ans => ans.toString());
     } else if (typeof rawAnswer === 'string' && rawAnswer.includes(',')) {
-        // 콤마로 구분된 경우
         possibleAnswers = rawAnswer.split(',').map(ans => ans.trim());
     } else {
         possibleAnswers = [rawAnswer.toString()];
     }
 
-    // 2. 객관식/OX에서 정답이 번호(숫자 또는 문자 "3", "1" 등)로 저장되어 있는 경우 대응
     if (q.type === '객관식' && q.options) {
         const numIdx = Number(rawAnswer);
         if (!isNaN(numIdx) && numIdx >= 1 && numIdx <= q.options.length) {
-            possibleAnswers.push(q.options[numIdx - 1]); // 예: 정답이 3이면 3번 보기 텍스트도 정답으로 인정
+            possibleAnswers.push(q.options[numIdx - 1]);
         }
     } else if (q.type === 'OX') {
         const numIdx = Number(rawAnswer);
@@ -383,13 +382,11 @@ function checkIsCorrect(userAns, q) {
         if (numIdx === 2) possibleAnswers.push('X');
     }
 
-    // 3. 비교 검증 (공백 및 대소문자 무시)
     return possibleAnswers.some(ans => {
         return cleanUserAns === ans.replace(/\s+/g, '').toLowerCase();
     });
 }
 
-// 개별 채점 진행 후 이동/제출
 function handleAction() {
     saveCurrentAnswer();
     const uAns = userAnswers[currentIndex] || "";
@@ -402,7 +399,6 @@ function handleAction() {
         const feedbackBox = document.getElementById('feedback-box');
         feedbackBox.style.display = 'block';
         
-        // 정답 표기 시 보기 번호/텍스트 중 보기 좋은 형태로 노출
         let displayAnswer = q.answer;
         if (q.type === '객관식' && !isNaN(Number(q.answer)) && q.options) {
             const idx = Number(q.answer) - 1;
@@ -460,12 +456,25 @@ function finishQuiz() {
     stopTimer();
 
     let score = 0;
-    let totalSec = questionTimes.reduce((a, b) => a + b, 0);
+    
+    // 방문(노출)했던 문제들만 필터링하여 총 소요시간 및 상세 결과 계산
+    let activeQuestionCount = 0;
+    let totalSec = 0;
+
+    selectedQuestions.forEach((q, idx) => {
+        if (visitedQuestions[idx]) {
+            totalSec += questionTimes[idx];
+        }
+    });
 
     const detailsContainer = document.getElementById('result-details');
     detailsContainer.innerHTML = '';
 
     selectedQuestions.forEach((q, idx) => {
+        // 화면에 한 번이라도 노출된 적 있는 문제만 결과에 포함
+        if (!visitedQuestions[idx]) return;
+
+        activeQuestionCount++;
         const uAns = userAnswers[idx] || "";
         const isCorrect = checkIsCorrect(uAns, q);
         
@@ -502,7 +511,7 @@ function finishQuiz() {
     });
 
     document.getElementById('final-score').innerText = score;
-    document.getElementById('final-total').innerText = selectedQuestions.length;
+    document.getElementById('final-total').innerText = activeQuestionCount; // 푼 문제 수 기준 총점
     
     const totalMin = Math.floor(totalSec / 60);
     const totalRemSec = totalSec % 60;
