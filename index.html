@@ -524,8 +524,20 @@ function finishQuiz() {
 }
 </script>
 
-<!-- 화면에는 전혀 안 보이지만 방문자 수는 정상 집계됩니다 (F12 개발자 도구의 Elements 탭에서 확인 가능) -->
-<img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fbjm73842-maker%2Fquiz_master&count_bg=%23ffffff00&title_bg=%23ffffff00&icon=&icon_color=%23ffffff00&title=&edge_flat=true" style="display:none;" />
+<!-- 마우스를 올리거나 꾹 누를 때만 보이는 카운터 -->
+<div style="text-align: center; margin-top: 20px;">
+    <div id="secret-counter" style="opacity: 0; transition: opacity 0.3s ease; cursor: default;" 
+         onmouseover="this.style.opacity='1'" 
+         onmouseout="this.style.opacity='0'" 
+         ontouchstart="this.style.opacity='1'" 
+         ontouchend="this.style.opacity='0'">
+        
+        <div id="sfcab5wfjd3pr41dpem9qpudmxcc31qaw6p"></div>
+        <script type="text/javascript" src="https://counter11.optistats.ovh/private/counter.js?c=ab5wfjd3pr41dpem9qpudmxcc31qaw6p&down=async" async></script>
+        <noscript><a href="https://www.freecounterstat.com" title="free website counter"><img src="https://counter11.optistats.ovh/private/freecounterstat.php?c=ab5wfjd3pr41dpem9qpudmxcc31qaw6p" border="0" title="free website counter" alt="free website counter"></a></noscript>
+    </div>
+    <span style="font-size: 11px; color: #ccc; user-select: none;">.</span>
+</div>
 
 </body>
 </html>
